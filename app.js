@@ -14,6 +14,7 @@ const orderRouter = require("./routes/orderRouter");
 const globalErrHandler = require("./middleware/globalErrHandler");
 app.use(cors());
 app.options("*", cors());
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 
 // middle ware
 app.use(express.json());

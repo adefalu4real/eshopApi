@@ -4,7 +4,7 @@ const { Product } = require("../model/Product");
 const isLogin = require("../middleware/isLogin");
 const isAdmin = require("../middleware/isAdmin");
 const multer = require("multer");
-const { Error } = require("mongoose");
+const { Error, default: mongoose } = require("mongoose");
 const router = express.Router();
 
 const FILE_TYPE_MAP = {
@@ -187,5 +187,34 @@ router.get("/get/feature", async (req, res) => {
     count: productFeature,
   });
 });
+
+router.put(
+  "/images/:id",
+  uploadOption.array("images", 10),
+  async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).send("Invalid Product Id");
+    }
+    const files = req.files;
+    let imagesPath = [];
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+    if (files) {
+      files.map((file) => {
+        imagesPath.push(`${basePath}${file.fileName}`);
+      });
+    }
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        images: imagesPath,
+      },
+      { new: true }
+    );
+    if (!product) {
+      res.status(404).send("the product with Id is not found");
+    }
+    res.send(product);
+  }
+);
 
 module.exports = router;
